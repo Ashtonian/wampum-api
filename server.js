@@ -6,16 +6,21 @@ var app = express();
 var logger = function(req, res, next) {
   console.log("request: " + req.originalUrl);
   for (var propName in req.body) {
-    console.log("body." + propName + " = " +  req.body[propName]);
+    var strLimit = 100;
+    if (req.body.length < 100)
+      strLimit = req.body.length;
+    console.log("body." + propName + " = " + req.body[propName].substr(0, strLimit));
   }
   for (var propName2 in req.params) {
-    console.log("parameters." + propName2 + " = " +  req.params[propName2]);
+    console.log("parameters." + propName2 + " = " + req.params[propName2]);
   }
 
   next(); // Passing the request to the next handler in the stack.
 };
 
-app.use(bodyParser.json({limit: '50mb'}));
+app.use(bodyParser.json({
+  limit: '50mb'
+}));
 app.use(logger);
 
 

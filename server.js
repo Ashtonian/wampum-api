@@ -9,7 +9,7 @@ var logger = function(req, res, next) {
     var strLimit = 100;
     if (req.body.length < 100)
       strLimit = req.body.length;
-    console.log("body." + propName + " = " + req.body[propName].substr(0, strLimit));
+    console.log("body." + propName + " = " + req.body[propName].toString().substr(0, strLimit));
   }
   for (var propName2 in req.params) {
     console.log("parameters." + propName2 + " = " + req.params[propName2]);

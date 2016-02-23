@@ -15,7 +15,7 @@ var logger = function(req, res, next) {
   next(); // Passing the request to the next handler in the stack.
 };
 
-app.use(bodyParser.json());
+app.use(bodyParser.json({limit: '50mb'}));
 app.use(logger);
 
 

@@ -16,6 +16,14 @@ var logger = function(req, res, next) {
   }
 
   next(); // Passing the request to the next handler in the stack.
+
+  console.log('response:');
+  for (var propName3 in res.body) {
+    var strLimit2 = 100;
+    if (res.body.length < 100)
+      strLimit2 = res.body.length;
+    console.log("body." + propName3 + " = " + res.body[propName3].toString().substr(0, strLimit2));
+  }
 };
 
 app.use(bodyParser.json({
@@ -53,6 +61,8 @@ var connStr = process.env.DATABASE_URL || 'postgres://qguezoaqqkpscn:AUsy1xWO0Co
 // TODO: multiple images pert barter-item/move images to image table
 // TODO: add swagger to api
 // TODO: user auth
+// TODO: get all sql errors ever?
+// TODO: catch all outgoing response errors?
 
 var userRouter = express.Router();
 userRouter.route('/')
@@ -143,9 +153,13 @@ barterItemRouter.route('/')
   })
   .post(function(req, res) {
     pg.connect(connStr, function(err, client, done) {
-      client.query('INSERT INTO public.barteritem (_id,_userid,title,description,image) VALUES($1::uuid,$2,$3,$4,$5)', [req.body._id, defaultUserId, req.body.title, req.body.description, req.body.image], function(err, result) {
+      if (err)
+        console.log('pg connect error: ' + err);
+
+      client.query('INSERT INTO public.barteritem (_id,_userid,title,description,image) VALUES($1::uuid,$2,$3,$4,$5)', [req.body._id, defaultUserId, req.body.title, req.body.description, req.body.image, [0]], function(err, result) {
         if (err)
-          res.end('an error occured' + err);
+          console.log('insert error: ' + err);
+        res.end('an error occured' + err);
         done();
         res.end('successful');
       });

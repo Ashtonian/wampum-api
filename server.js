@@ -156,7 +156,7 @@ barterItemRouter.route('/')
       if (err)
         console.log('pg connect error: ' + err);
 
-      client.query('INSERT INTO public.barteritem (_id,_userid,title,description,image) VALUES($1::uuid,$2,$3,$4,$5)', [req.body._id, defaultUserId, req.body.title, req.body.description, req.body.image, [0]], function(err, result) {
+      client.query('INSERT INTO public.barteritem (_id,_userid,title,description,image) VALUES($1::uuid,$2,$3,$4,$5)', [req.body._id, defaultUserId, req.body.title, req.body.description, req.body.image[0]], function(err, result) {
         if (err)
           console.log('insert error: ' + err);
         res.end('an error occured' + err);

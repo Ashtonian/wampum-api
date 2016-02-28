@@ -3,6 +3,7 @@ var bodyParser = require('body-parser');
 var multer = require('multer');
 var uuid = require('node-uuid');
 var pg = require('pg').native;
+var aws = require('aws-sdk');
 var app = express();
 
 var logger = function(req, res, next) {
@@ -40,7 +41,10 @@ app.get('/', function(req, res) {
 
 var defaultUserId = 'db8203a5-6bb8-40c9-bcd9-10b4cc92bf25';
 var port = process.env.PORT || 8080;
-var connStr = process.env.DATABASE_URL || 'postgres://qguezoaqqkpscn:AUsy1xWO0Co4X_UBzf-fDckjGI@ec2-54-83-29-133.compute-1.amazonaws.com:5432/d5uc0fftpm2356';
+var connStr = process.env.DATABASE_URL;
+var AWS_ACCESS_KEY_ID = process.env.AWS_ACCESS_KEY_ID;
+var AWS_ACCESS_KEY = process.env.AWS_ACCESS_KEY;
+var S3_BUCKET = process.env.S3_BUCKET;
 
 // TODO: move routes to seperate place?
 // TODO: create controllers?
@@ -154,7 +158,7 @@ barterItemRouter.route('/')
       });
     }
   })
-  .post(function(req, res) {
+  .put(function(req, res) {
     var itemId = uuid.v1();
     pg.connect(connStr, function(err, client, done) {
       if (err)
@@ -169,7 +173,7 @@ barterItemRouter.route('/')
       });
     });
   })
-  .put(function(req, res) {
+  .post(function(req, res) {
     res.send('item is suppossed to be updated if this was implemented.');
   });
 
@@ -213,14 +217,43 @@ barterItemRouter.route('/:_id/vote')
     res.send('created a fucking vote with: ' + req.body.like);
   });
 
-var upload = multer({dest: './uploads/'}).single('photo');
-barterItemRouter.route('/:_id/photo')
-  .post(upload,function(req, res) {
-    res.end();
+var s3Router = express.Router();
+s3Router.route('/').get(function(req, res) {
+  if(req.query.file_type != '.png' )
+    res.status('404').end("gtfo");
+
+var fileName = uuid.v1() + req.query.file_type;
+  aws.config.update({
+    accessKeyId: AWS_ACCESS_KEY_ID,
+    secretAccessKey: AWS_ACCESS_KEY
   });
+  var s3 = new aws.S3();
+  var s3_params = {
+    Bucket: S3_BUCKET,
+    Key: fileName,
+    Expires: 10,
+    ContentType: req.query.file_type,
+    ACL: 'public-read'
+  };
+  s3.getSignedUrl('putObject', s3_params, function(err, data) {
+    if (err) {
+      console.log(err);
+    } else {
+      var return_data = {
+        signedRequest: data,
+        url: 'https://' + S3_BUCKET + '.s3.amazonaws.com/' + fileName,
+        fileName: fileName
+      };
+      res.write(JSON.stringify(return_data));
+      res.end();
+    }
+  });
+});
 
 app.use('/user', userRouter);
 app.use('/barter-item', barterItemRouter);
+app.use('/signed-request', s3Router);
+
 
 app.listen(port, function() {
   console.log('Example app listening on port ' + port + '!');

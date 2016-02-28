@@ -1,5 +1,7 @@
 var express = require('express');
 var bodyParser = require('body-parser');
+var multer = require('multer');
+var uuid = require('node-uuid');
 var pg = require('pg').native;
 var app = express();
 
@@ -84,11 +86,12 @@ userRouter.route('/')
   })
   .post(function(req, res) {
     pg.connect(connStr, function(err, client, done) {
-      client.query('INSERT INTO public.User (_id,username,email,phonenumber) VALUES($1::uuid,$2,$3,$4)', [req.body._id, req.body.username, req.body.email, req.body.phonenumber], function(err, result) {
+      var itemId = uuid.v1();
+      client.query('INSERT INTO public.User (_id,username,email,phonenumber) VALUES($1::uuid,$2,$3,$4)', [itemId, req.body.username, req.body.email, req.body.phonenumber], function(err, result) {
         if (err)
           res.end('an error occured' + err);
         done();
-        res.end('successful');
+        res.location('/' + itemId);
       });
     });
 
@@ -152,16 +155,17 @@ barterItemRouter.route('/')
     }
   })
   .post(function(req, res) {
+    var itemId = uuid.v1();
     pg.connect(connStr, function(err, client, done) {
       if (err)
         console.log('pg connect error: ' + err);
-
-      client.query('INSERT INTO public.barteritem (_id,_userid,title,description,image) VALUES($1::uuid,$2,$3,$4,$5)', [req.body._id, defaultUserId, req.body.title, req.body.description, req.body.images[0]], function(err, result) {
-        if (err)
+      client.query('INSERT INTO public.barteritem (_id,_userid,title,description,image) VALUES($1::uuid,$2::uuid,$3,$4,$5)', [itemId, defaultUserId, req.body.title, req.body.description, ""], function(err, result) {
+        if (err) {
           console.log('insert error: ' + err);
-        res.end('an error occured' + err);
+          res.end('an error occured' + err);
+        }
         done();
-        res.end('successful');
+        res.location(req.originalUrl + '/' + itemId).status('201').end();
       });
     });
   })
@@ -203,33 +207,20 @@ barterItemRouter.route('/:_id')
       });
     });
   });
+
 barterItemRouter.route('/:_id/vote')
   .post(function(req, res) {
     res.send('created a fucking vote with: ' + req.body.like);
   });
 
-var imageRouter = express.Router();
-imageRouter.route('/').get(function(req, res) {
-  pg.connect(connStr, function(err, client, done) {
-    client.query('SELECT image FROM public.barteritem WHERE _id = $1::uuid', [req.params._id], function(err, result) {
-      if (err)
-        res.end('an error occured' + err);
-      done();
-      var img = new Buffer(result.rows[0], 'base64');
-      res.writeHead(200, {
-        'Content-Type': 'image/png',
-        'Content-Length': img.length
-      });
-
-      res.end(img);
-    });
+var upload = multer({dest: './uploads/'}).single('photo');
+barterItemRouter.route('/:_id/photo')
+  .post(upload,function(req, res) {
+    res.end();
   });
-});
 
 app.use('/user', userRouter);
 app.use('/barter-item', barterItemRouter);
-app.use('/image', imageRouter);
-
 
 app.listen(port, function() {
   console.log('Example app listening on port ' + port + '!');

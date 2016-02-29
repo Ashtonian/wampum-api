@@ -17,6 +17,10 @@ var logger = function(req, res, next) {
   for (var propName2 in req.params) {
     console.log("parameters." + propName2 + " = " + req.params[propName2]);
   }
+  var host = req.get('host');
+  console.log("host " + host);
+  var origin = req.get('origin');
+console.log("origin " + origin);
 
   next(); // Passing the request to the next handler in the stack.
 

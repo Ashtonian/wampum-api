@@ -213,7 +213,7 @@ barterItemRouter.route('/')
           var fileType = fileUrl.substr(fileUrl.lastIndexOf('.'));
           var fileName = uuid.v1() + fileType;
 
-          var signedUrl = getSignedUrl(fileUrl, fileName, fileType);
+          var signedUrl = getSignedUrl(fileName, fileType);
           var return_data = {
             uploadUrl: signedUrl,
             accessURL: 'https://' + S3_BUCKET + '.s3.amazonaws.com/' + fileName,

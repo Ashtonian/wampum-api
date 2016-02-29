@@ -46,6 +46,23 @@ var AWS_ACCESS_KEY_ID = process.env.AWS_ACCESS_KEY_ID;
 var AWS_ACCESS_KEY = process.env.AWS_ACCESS_KEY;
 var S3_BUCKET = process.env.S3_BUCKET;
 
+function getSignedUrl(fileUrl, fileName, contentType) {
+  // TODO: extract s3 code and use promises
+  aws.config.update({
+    accessKeyId: AWS_ACCESS_KEY_ID,
+    secretAccessKey: AWS_ACCESS_KEY
+  });
+  var s3 = new aws.S3();
+  var s3_params = {
+    Bucket: S3_BUCKET,
+    Key: fileName,
+    Expires: 10,
+    ContentType: contentType,
+    ACL: 'public-read'
+  };
+  return s3.getSignedUrl('putObject', s3_params);
+}
+
 // TODO: move routes to seperate place?
 // TODO: create controllers?
 // TODO: create data service for each resource?
@@ -187,8 +204,9 @@ barterItemRouter.route('/')
           var fileType = fileUrl.substr(fileUrl.lastIndexOf('.'));
           var fileName = uuid.v1() + fileType;
 
+          var signedUrl = getSignedUrl(fileUrl, fileName, fileType);
           var return_data = {
-            uploadUrl: getSignedUrl(fileUrl, fileName, fileType),
+            uploadUrl: signedUrl,
             accessURL: 'https://' + S3_BUCKET + '.s3.amazonaws.com/' + fileName,
             fileName: fileName,
             deviceFileUrl: fileUrl
@@ -244,28 +262,7 @@ barterItemRouter.route('/:_id/vote')
     res.send('created a fucking vote with: ' + req.body.like);
   });
 
-function getSignedUrl(fileUrl, fileName, ContentType) {
-  // TODO: extract s3 code and use promises
-  aws.config.update({
-    accessKeyId: AWS_ACCESS_KEY_ID,
-    secretAccessKey: AWS_ACCESS_KEY
-  });
-  var s3 = new aws.S3();
-  var s3_params = {
-    Bucket: S3_BUCKET,
-    Key: fileName,
-    Expires: 10,
-    ContentType: ContentType,
-    ACL: 'public-read'
-  };
-  s3.getSignedUrl('putObject', s3_params, function(err, data) {
-    if (err) {
-      console.log(err);
-    } else {
-      return data;
-    }
-  });
-}
+
 
 app.use('/user', userRouter);
 app.use('/barter-item', barterItemRouter);

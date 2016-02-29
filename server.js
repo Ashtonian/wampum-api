@@ -46,7 +46,14 @@ var AWS_ACCESS_KEY_ID = process.env.AWS_ACCESS_KEY_ID;
 var AWS_ACCESS_KEY = process.env.AWS_ACCESS_KEY;
 var S3_BUCKET = process.env.S3_BUCKET;
 
-function getSignedUrl(fileUrl, fileName, contentType) {
+function GetMimeTypeFromExtension(fileExtension) {
+  if (fileExtension === '.png')
+    return "image/png";
+  if (fileExtension === '.jpeg' || fileExtension === '.jpg')
+    return "image/jpeg";
+}
+
+function getSignedUrl(fileName, fileExtension) {
   // TODO: extract s3 code and use promises
   aws.config.update({
     accessKeyId: AWS_ACCESS_KEY_ID,
@@ -57,11 +64,13 @@ function getSignedUrl(fileUrl, fileName, contentType) {
     Bucket: S3_BUCKET,
     Key: fileName,
     Expires: 10,
-    ContentType: contentType,
+    ContentType: GetMimeTypeFromExtension(fileExtension) ,
     ACL: 'public-read'
   };
   return s3.getSignedUrl('putObject', s3_params);
 }
+
+
 
 // TODO: move routes to seperate place?
 // TODO: create controllers?

@@ -158,7 +158,7 @@ barterItemRouter.route('/')
       });
     }
   })
-  .put(function(req, res) {
+  .post(function(req, res) {
     var itemId = uuid.v1();
     pg.connect(connStr, function(err, client, done) {
       if (err)
@@ -173,7 +173,7 @@ barterItemRouter.route('/')
       });
     });
   })
-  .post(function(req, res) {
+  .put(function(req, res) {
     res.send('item is suppossed to be updated if this was implemented.');
   });
 
@@ -217,43 +217,52 @@ barterItemRouter.route('/:_id/vote')
     res.send('created a fucking vote with: ' + req.body.like);
   });
 
-var s3Router = express.Router();
-s3Router.route('/').get(function(req, res) {
-  if(req.query.file_type != '.png' )
-    res.status('404').end("gtfo");
+barterItemRouter.route('/:_id/photo')
+  .post(function(req, res) {
 
-var fileName = uuid.v1() + req.query.file_type;
-  aws.config.update({
-    accessKeyId: AWS_ACCESS_KEY_ID,
-    secretAccessKey: AWS_ACCESS_KEY
+    var fileUrl = req.body.fileUrl;
+    var fileType = fileUrl.substr(fileUrl.lastIndexOf('.'));
+
+    if (rfile_type!= '.png' || file_type != '.jpeg')
+      res.status('404').end("gtfo");
+    // TODO: make sure the user can modify this object
+    // TODO: make sure that DeviceFileUrl is valid?
+
+    var fileName = uuid.v1() + req.query.file_type;
+    console.log("TODO: add " + fileName + " to " + req.params._id); // TODO:
+
+    // TODO: extract s3 code and use promises
+    aws.config.update({
+      accessKeyId: AWS_ACCESS_KEY_ID,
+      secretAccessKey: AWS_ACCESS_KEY
+    });
+    var s3 = new aws.S3();
+    var s3_params = {
+      Bucket: S3_BUCKET,
+      Key: fileName,
+      Expires: 10,
+      ContentType: req.query.file_type,
+      ACL: 'public-read'
+    };
+    s3.getSignedUrl('putObject', s3_params, function(err, data) {
+      if (err) {
+        console.log(err);
+      } else {
+        var return_data = {
+          UploadUrl: data,
+          AccessURL: 'https://' + S3_BUCKET + '.s3.amazonaws.com/' + fileName,
+          FileName: fileName,
+          DeviceFileUrl: fileUrl
+        };
+        res.write(JSON.stringify(return_data));
+        res.end();
+      }
+    });
   });
-  var s3 = new aws.S3();
-  var s3_params = {
-    Bucket: S3_BUCKET,
-    Key: fileName,
-    Expires: 10,
-    ContentType: req.query.file_type,
-    ACL: 'public-read'
-  };
-  s3.getSignedUrl('putObject', s3_params, function(err, data) {
-    if (err) {
-      console.log(err);
-    } else {
-      var return_data = {
-        signedRequest: data,
-        url: 'https://' + S3_BUCKET + '.s3.amazonaws.com/' + fileName,
-        fileName: fileName
-      };
-      res.write(JSON.stringify(return_data));
-      res.end();
-    }
-  });
-});
+
 
 app.use('/user', userRouter);
 app.use('/barter-item', barterItemRouter);
-app.use('/signed-request', s3Router);
-
 
 app.listen(port, function() {
   console.log('Example app listening on port ' + port + '!');

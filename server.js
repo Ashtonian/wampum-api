@@ -159,17 +159,44 @@ barterItemRouter.route('/')
     }
   })
   .post(function(req, res) {
-    var itemId = uuid.v1();
+
+    // TODO: make sure image types are ok
+    // TODO: make sure that DeviceFileUrl is valid?
+
+    var barterItem = req.body;
+    barterItem._userid = defaultUserId;
+    barterItem._id = uuid.v1();
+
+    // Insert base item meta data
     pg.connect(connStr, function(err, client, done) {
       if (err)
         console.log('pg connect error: ' + err);
-      client.query('INSERT INTO public.barteritem (_id,_userid,title,description,image) VALUES($1::uuid,$2::uuid,$3,$4,$5)', [itemId, defaultUserId, req.body.title, req.body.description, ""], function(err, result) {
+      client.query('INSERT INTO public.barteritem (_id,_userid,title,description,image) VALUES($1::uuid,$2::uuid,$3,$4,$5)', [barterItem._id, barterItem._userid, barterItem.title, barterItem.description, ""], function(err, result) {
         if (err) {
           console.log('insert error: ' + err);
           res.end('an error occured' + err);
         }
         done();
-        res.location(req.originalUrl + '/' + itemId).status('201').end();
+
+        // Generate instructions for all images
+        var responseData = {};
+        responseData.uploadInstructions = [];
+        for (var i = 0; i < barterItem.images.length; i++) {
+
+          var fileUrl = barterItem.images[0];
+          var fileType = fileUrl.substr(fileUrl.lastIndexOf('.'));
+          var fileName = uuid.v1() + fileType;
+
+          var return_data = {
+            uploadUrl: getSignedUrl(fileUrl, fileName, fileType),
+            accessURL: 'https://' + S3_BUCKET + '.s3.amazonaws.com/' + fileName,
+            fileName: fileName,
+            deviceFileUrl: fileUrl
+          };
+          responseData.uploadInstructions.push(return_data);
+        }
+
+        res.location(req.originalUrl + '/' + barterItem._id).status('201').send(responseData).end();
       });
     });
   })
@@ -217,49 +244,28 @@ barterItemRouter.route('/:_id/vote')
     res.send('created a fucking vote with: ' + req.body.like);
   });
 
-barterItemRouter.route('/:_id/photo')
-  .post(function(req, res) {
-
-    var fileUrl = req.body.fileUrl;
-    var fileType = fileUrl.substr(fileUrl.lastIndexOf('.'));
-
-    if (rfile_type!= '.png' || file_type != '.jpeg')
-      res.status('404').end("gtfo");
-    // TODO: make sure the user can modify this object
-    // TODO: make sure that DeviceFileUrl is valid?
-
-    var fileName = uuid.v1() + req.query.file_type;
-    console.log("TODO: add " + fileName + " to " + req.params._id); // TODO:
-
-    // TODO: extract s3 code and use promises
-    aws.config.update({
-      accessKeyId: AWS_ACCESS_KEY_ID,
-      secretAccessKey: AWS_ACCESS_KEY
-    });
-    var s3 = new aws.S3();
-    var s3_params = {
-      Bucket: S3_BUCKET,
-      Key: fileName,
-      Expires: 10,
-      ContentType: req.query.file_type,
-      ACL: 'public-read'
-    };
-    s3.getSignedUrl('putObject', s3_params, function(err, data) {
-      if (err) {
-        console.log(err);
-      } else {
-        var return_data = {
-          UploadUrl: data,
-          AccessURL: 'https://' + S3_BUCKET + '.s3.amazonaws.com/' + fileName,
-          FileName: fileName,
-          DeviceFileUrl: fileUrl
-        };
-        res.write(JSON.stringify(return_data));
-        res.end();
-      }
-    });
+function getSignedUrl(fileUrl, fileName, ContentType) {
+  // TODO: extract s3 code and use promises
+  aws.config.update({
+    accessKeyId: AWS_ACCESS_KEY_ID,
+    secretAccessKey: AWS_ACCESS_KEY
   });
-
+  var s3 = new aws.S3();
+  var s3_params = {
+    Bucket: S3_BUCKET,
+    Key: fileName,
+    Expires: 10,
+    ContentType: ContentType,
+    ACL: 'public-read'
+  };
+  s3.getSignedUrl('putObject', s3_params, function(err, data) {
+    if (err) {
+      console.log(err);
+    } else {
+      return data;
+    }
+  });
+}
 
 app.use('/user', userRouter);
 app.use('/barter-item', barterItemRouter);

@@ -100,6 +100,10 @@ function getSignedUrl(fileName, fileExtension) {
   return s3.getSignedUrl('putObject', s3_params);
 }
 
+function getS3Path(fileName) {
+  return 'https://' + S3_BUCKET + '.s3.amazonaws.com/' + fileName;
+}
+
 var userRouter = express.Router();
 userRouter.route('/')
   .get(function(req, res) {
@@ -157,11 +161,22 @@ barterItemRouter.route('/')
     // TODO: optional parameters use samse query
     if (req.query.currentUser) {
       pg.connect(connStr, function(err, client, done) {
-        client.query('SELECT * FROM public.barter_item where _user_id = ($1)', [defaultUserId], function(err, result) {
+
+        client.query('SELECT  bi._id,  bi._user_id,  bi.title,  bi.description,  json_agg(bii.*) as images FROM public.barter_item bi JOIN public.barter_item_image bii ON bi._id = bii._barter_item_id  where bi._user_id = $1::uuid group by bi._id', [defaultUserId], function(err, result) {
+
           if (err)
             res.end('an error occured' + err);
           done();
-          var json = JSON.stringify(result.rows);
+
+          var barterItems = result.rows;
+          for (var i = 0; i < barterItems.length; i++) {
+            for (var j = 0; j < barterItems[i].images.length; j++) {
+              var fileName = barterItems[i].images[j]._id + barterItems[i].images[j].file_extension;
+              barterItems[i].images[j].url = getS3Path(fileName);
+            }
+          }
+
+          var json = JSON.stringify(barterItems);
 
           res.writeHead(200, {
             'content-type': 'application/json',
@@ -172,11 +187,20 @@ barterItemRouter.route('/')
       });
     } else {
       pg.connect(connStr, function(err, client, done) {
-        client.query('SELECT * FROM public.barter_item', function(err, result) {
+        client.query('SELECT  bi._id,  bi._user_id,  bi.title,  bi.description,  json_agg(bii.*) as images FROM public.barter_item bi JOIN public.barter_item_image bii ON bi._id = bii._barter_item_id group by bi._id', function(err, result) {
           if (err)
             res.end('an error occured' + err);
           done();
-          var json = JSON.stringify(result.rows);
+
+          var barterItems = result.rows;
+          for (var i = 0; i < barterItems.length; i++) {
+            for (var j = 0; j < barterItems[i].images.length; j++) {
+              var fileName = barterItems[i].images[j]._id + barterItems[i].images[j].file_extension;
+              barterItems[i].images[j].url = getS3Path(fileName);
+            }
+          }
+
+          var json = JSON.stringify(barterItems);
 
           res.writeHead(200, {
             'content-type': 'application/json',
@@ -225,7 +249,7 @@ barterItemRouter.route('/')
           var signedUrl = getSignedUrl(fileName, fileType);
           var return_data = {
             uploadUrl: signedUrl,
-            accessURL: 'https://' + S3_BUCKET + '.s3.amazonaws.com/' + fileName,
+            accessURL: getS3Path(fileNames),
             fileName: fileName,
             deviceFileUrl: fileUrl
           };

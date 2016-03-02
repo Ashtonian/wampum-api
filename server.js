@@ -249,7 +249,7 @@ barterItemRouter.route('/')
           var signedUrl = getSignedUrl(fileName, fileType);
           var return_data = {
             uploadUrl: signedUrl,
-            accessURL: getS3Path(fileNames),
+            accessURL: getS3Path(fileName),
             fileName: fileName,
             deviceFileUrl: fileUrl
           };

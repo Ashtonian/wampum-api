@@ -280,7 +280,7 @@ function InsertImage(image) {
 
 barterItemRouter.route('/recommendations/').get(function(req, res) {
   pg.connect(connStr, function(err, client, done) {
-    client.query('SELECT  bi._id,  bi._user_id,  bi.title,  bi.description,  json_agg(bii.*) as images FROM public.barter_item bi JOIN public.barter_item_image bii ON bi._id = bii._barter_item_id group by bi._id', [defaultUserId], function(err, result) {
+    client.query('SELECT  bi._id,  bi._user_id,  bi.title,  bi.description,  json_agg(bii.*) as images FROM public.barter_item bi JOIN public.barter_item_image bii ON bi._id = bii._barter_item_id group by bi._id', function(err, result) {
       if (err)
         res.end('an error occured' + err);
       done();

@@ -28,3 +28,6 @@ node_modules
 
 # configuration
 .env
+
+# OS X
+*.DS_Store

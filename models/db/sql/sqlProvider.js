@@ -1,7 +1,7 @@
 var QueryFile = require('pg-promise').QueryFile;
 
 function sql(file) {
-    var path = '.catch/db/sql/' + file;
+    var path = './models/db/sql/' + file;
 
     var options = {
         debug: true,

@@ -20,6 +20,7 @@ function getFakeBarterItem() {
     return item;
 }
 
+// TODO: mock db repo? and test 
 var barterItems = require('../../models/barterItems'); // go in through provider
 
 describe('barter item model', () => {
@@ -28,16 +29,45 @@ describe('barter item model', () => {
     /* add, all, find, findByUserId, Remove, update */
     let currentBarterItems = [];
 
-
     it('initializes correctly', done => {
         barterItems.should.not.be.null;
         done();
     });
 
+    it('adds item and finds the item by id', done => {
+        let barterItem = getFakeBarterItem();
+        currentBarterItems.push(barterItem);
+        barterItems.add(barterItem).then(() => {
+            return barterItems.find(barterItem.barterItemId)
+        }).should.eventually.be.eql(barterItem).notify(done);
+    });
+
+
+    it('adds item and returns itemIds and image ids', done => {
+        let barterItem = getFakeBarterItem();
+        currentBarterItems.push(barterItem);
+        barterItems.add(barterItem).should.eventually.be.eql({
+            barterItemId: barterItem.barterItemId,
+            imageIds: barterItem.images.map(img => img.imageId)
+        }).notify(done);
+    });
+
     it('gets all barter items', done => {
         let barterItem = getFakeBarterItem();
         currentBarterItems.push(barterItem);
-        barterItems.all().should.eventually.have.length.above(1).and.include(barterItem).notify(done);
+        barterItems.add(barterItem).then(() => {
+            return barterItems.all();
+        }).should.eventually.have.length.above(1).and.include(barterItem).notify(done);
+    });
+
+    it('adds an item, removes the item', done => {
+        let barterItem = getFakeBarterItem();
+        currentBarterItems.push(barterItem);
+        barterItems.add(barterItem).then(() => {
+            return barterItems.remove(barterItem.barterItemId);
+        }).then(() => {
+            return barterItems.all();
+        }).should.eventually.have.length.above(1).and.not.include(barterItem).notify(done);
     });
 
     afterEach(done => {
@@ -47,7 +77,7 @@ describe('barter item model', () => {
             barterItems.remove(item.barterItemId)
         );
 
-        require('../../db/dbProvider.js').close();
+        require('../../models/db/dbProvider.js').close();
         done();
     });
 });

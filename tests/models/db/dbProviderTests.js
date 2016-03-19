@@ -1,4 +1,4 @@
-var dbProvider = require('../../db/dbProvider.js');
+var dbProvider = require('../../../models/db/dbProvider.js');
 
 describe('Db Provider', () => {
 

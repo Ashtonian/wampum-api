@@ -1,61 +1,54 @@
-var barterItems = require('../db/dbProvider').db.barterItems;
+var barterItems = require('./db/dbProvider').db.barterItems;
 var s3 = require('../utilities/s3.js');
 var uuid = require('node-uuid');
 
-function setImageGetUrls(barterItem) {
-    barterItem.images.map(image => image.url = s3.getS3Path(image.name + image.extension));
+function getBarterItemWithImageUrls(barterItem) {
+    barterItem.images.map(image => image.url = s3.getS3Path(image.imageId + image.fileExtension));
     return barterItem;
 }
 
-function setImageGetUrlsForMany(barterItems) {
-    barterItems.map(item => setImageGetUrls(item));
+function getBarterItemsWithImageUrls(barterItems) {
+    barterItems.map(item => getBarterItemWithImageUrls(item));
     return barterItems;
 }
 
+function getImageUploadInstructions(image) {
+    return {
+        uploadUrl: s3.getSignedPutUrl(image.imageId, image.fileExtension),
+        accessURL: s3.getS3Path(image.imageId + image.fileExtension)
+    };
+}
+
 module.exports = {
-    add: barterItem => {
-        return barterItems.add(barterItem);
+    add: (barterItem, userId) => {
+        // TODO: validate barter item before it hits the repo
+
+        // set ids
+        barterItem.barterItemId = uuid.v4();
+        barterItem.images.map(image => image.imageId = uuid.v4());
+
+        return barterItems.add(barterItem, userId).then((insertResults) => {
+            // TODO: validate all items were inserted correctly
+            return {
+                barterItemId: barterItem.barterItemId,
+                uploadInstructions: barterItem.images.map(image => getImageUploadInstructions(image))
+            };
+        });
     },
     all: () => {
-        return barterItems.all().then(setImageGetUrlsForMany);
+        return barterItems.all().then(getBarterItemsWithImageUrls);
     },
     find: id => {
-        return barterItems.find(id).then(setImageGetUrls);
+        return barterItems.find(id).then(getBarterItemWithImageUrls);
     },
     findByUserId: userId => {
-        return barterItems.findByUserId(userId).then(setImageGetUrlsForMany);
+        return barterItems.findByUserId(userId).then(getBarterItemsWithImageUrls);
     },
     remove: id => {
         return barterItems.remove(id);
     },
     update: barterItem => {
+        // TODO: validate
         return barterItems.update(barterItem);
     }
 };
-
-
-
-/*
-
-for (var i = 0; i < barterItem.images.length; i++) {
-
-    var fileUrl = barterItem.images[0];
-    var fileType = fileUrl.substr(fileUrl.lastIndexOf('.'));
-    var imageId = uuid.v4();
-    var fileName = imageId + fileType;
-    InsertImage({
-        _id: imageId,
-        _barter_item_id: barterItem._id,
-        file_extension: fileType
-    });
-
-    var signedUrl = getSignedUrl(fileName, fileType);
-    var return_data = {
-        uploadUrl: signedUrl,
-        accessURL: getS3Path(fileName),
-        fileName: fileName,
-        deviceFileUrl: fileUrl
-    };
-    responseData.uploadInstructions.push(return_data);
-}
-*/

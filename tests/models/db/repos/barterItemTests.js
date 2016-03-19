@@ -18,7 +18,7 @@ function getFakeBarterItem() {
     };
     return item;
 }
-var barterItems = require('../../../db/dbProvider.js').db.barterItems; // go in through provider
+var barterItems = require('../../../../models/db/dbProvider.js').db.barterItems; // go in through provider
 
 describe('barter item repo', () => {
     'use strict';
@@ -74,7 +74,7 @@ describe('barter item repo', () => {
             barterItems.remove(item.barterItemId)
         );
 
-        require('../../../db/dbProvider.js').close();
+        require('../../../../models/db/dbProvider.js').close();
         done();
     });
 });

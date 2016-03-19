@@ -11,8 +11,6 @@ function Inserts(template, data) {
     };
 }
 
-
-
 var sql = require('../sql/sqlProvider.js').barterItems;
 
 /**
@@ -31,13 +29,17 @@ function getImagesToInsert(id, images) {
 }
 
 module.exports = rep => {
-
     return {
         // Adds a new record and returns the new id;
-        add: barterItem =>
+        add: (barterItem, userId) =>
             rep.tx(t => {
                 return t.batch([
-                    t.one(sql.add, barterItem),
+                    t.one(sql.add, {
+                        barterItemId: barterItem.barterItemId,
+                        userId: userId,
+                        title: barterItem.title,
+                        description: barterItem.description
+                    }),
                     t.many(sql.addImages, new Inserts('${imageId}::uuid,${barterItemId}::uuid,${fileExtension}', getImagesToInsert(barterItem.barterItemId, barterItem.images)))
                 ]);
             })

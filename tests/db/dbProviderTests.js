@@ -10,7 +10,7 @@ describe('Db Provider', () => {
     });
 
     afterEach( (done) => {
-        require('../../../models/db/dbProvider.js').close();
+        require('../../db/dbProvider.js').close();
         done();
     });
 

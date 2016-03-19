@@ -8,6 +8,7 @@ module.exports = function (wallaby) {
             '*.log',
             'controllers/**/*.js',
             'middlewares/**/*.js',
+            'db/**/*.js',
             'models/**/*.js',
             'models/**/*.sql',
             'public/**/*.js',

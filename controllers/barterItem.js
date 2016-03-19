@@ -27,16 +27,8 @@ barterItemRouter.route('/')
         barterItem._id = uuid.v4();
 
         // Insert base item meta data
-        pg.connect(connStr, function (err, client, done) {
-            if (err)
-                console.log('pg connect error: ' + err);
-            client.query('INSERT INTO public.barter_item (_id,_user_id,title,description) VALUES($1::uuid,$2::uuid,$3,$4)', [barterItem._id, barterItem._user_id, barterItem.title, barterItem.description], function (err, result) {
-                if (err) {
-                    console.log('insert error: ' + err);
-                    res.end('an error occured' + err);
-                }
-                done();
 
+/*
                 // Generate instructions for all images
                 var responseData = {};
                 responseData.uploadInstructions = [];
@@ -64,7 +56,7 @@ barterItemRouter.route('/')
 
                 res.location(req.originalUrl + '/' + barterItem._id).status('201').send(responseData).end();
             });
-        });
+        });*/
     })
     .put(function (req, res) {
         res.send('item is suppossed to be updated if this was implemented.');

@@ -15,11 +15,20 @@ function Inserts(template, data) {
 
 var sql = require('../sql/sqlProvider.js').barterItems;
 
-function setBarterItemIds(id, images) {
-    images.map(image => image.barterItemId = id);
-    return images;
+/**
+deep copy images in array so that when the barterItemId is added it does not modify the original objects.
+TODO: find a better way to do this?
+*/
+function getImagesToInsert(id, images) {
+    return images.map(
+        image => {
+            return {
+                imageId: image.imageId,
+                barterItemId: id,
+                fileExtension: image.fileExtension
+            };
+        });
 }
-
 
 module.exports = rep => {
 
@@ -29,13 +38,13 @@ module.exports = rep => {
             rep.tx(t => {
                 return t.batch([
                     t.one(sql.add, barterItem),
-                    t.many(sql.addImages, new Inserts('${barterItemImageId}::uuid,${barterItemId}::uuid,${fileExtension}', setBarterItemIds(barterItem.barterItemId, barterItem.images)))
+                    t.many(sql.addImages, new Inserts('${imageId}::uuid,${barterItemId}::uuid,${fileExtension}', getImagesToInsert(barterItem.barterItemId, barterItem.images)))
                 ]);
             })
             .then(data => {
                 return {
-                    barterItemId: data[0],
-                    imageNames: data[1]
+                    barterItemId: data[0].barterItemId,
+                    imageIds: data[1].map(img => img.imageId)
                 };
             }),
 

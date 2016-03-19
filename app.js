@@ -35,24 +35,22 @@ var morgan = require('morgan');
 // TODO: sequential UUID? quessable uuid? v1 vs v4?
 
 app.use(bodyParser.json({
-  limit: '50mb'
+    limit: '50mb'
 }));
 
 app.use(morgan('dev'));
 
-
-app.get('/', function(req, res) {
-  res.send('shit is running.');
+app.get('/', (request, response) => {
+    response.end('shit is running.');
 });
 
-var defaultUserId = 'db8203a5-6bb8-40c9-bcd9-10b4cc92bf25';
 var port = process.env.PORT || 8080;
 var connStr = process.env.DATABASE_URL;
 
 
-app.use('/user', require('./controllers/user.js'));
-app.use('/barter-item', require('./controllers/barter-item.js'));
+app.use('/user', require('./controllers/user'));
+app.use('/barter-item', require('./controllers/barterItem'));
 
-app.listen(port, function() {
-  console.log('Example app listening on port ' + port + '!');
+app.listen(port, () => {
+    console.log('Example app listening on port ' + port + '!');
 });

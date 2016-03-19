@@ -23,7 +23,7 @@ var barterItems = require('../../../../models/db/dbProvider.js').db.barterItems;
 describe('barter item repo', () => {
     'use strict';
 
-    /* add, all, find, findByUserId, Remove, update */
+    /* TODO:findByUserId, update */
     let currentBarterItems = [];
 
     it('initializes correctly', done => {

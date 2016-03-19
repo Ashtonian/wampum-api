@@ -54,7 +54,7 @@ module.exports = rep => {
 
         find: id => rep.oneOrNone(sql.find, id),
 
-        findByUserId: userId => rep.any(sql.find, userId),
+        findByUserId: userId => rep.any(sql.findByUserId, userId),
 
         remove: id => rep.result(sql.remove, id)
             .then(result => result.rowCount),

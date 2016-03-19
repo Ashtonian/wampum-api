@@ -28,7 +28,7 @@ module.exports = {
         addImages: sql('barterItems/addImages.sql'),
         all: sql('barterItems/all.sql'),
         find: sql('barterItems/find.sql'),
-        findByUserId: sql('barterItems/find.sql'),
+        findByUserId: sql('barterItems/findByUserId.sql'),
         remove: sql('barterItems/remove.sql'),
         update: sql('barterItems/update.sql')
     }

@@ -1,7 +1,7 @@
-var defaultUserId = '2346b67a-9f02-40e6-984c-83ab20a993f5';
+var defaultUserId = 'db8203a5-6bb8-40c9-bcd9-10b4cc92bf25';
 var barterItemRouter = require('express').Router();
 
-var barterItems = require('../models/barterItem');
+var barterItems = require('../models/barterItems');
 
 barterItemRouter.route('/')
     .get((request, response) => {
@@ -15,7 +15,7 @@ barterItemRouter.route('/')
                 }
             });
         } else {
-            barterItems.All().then(results => {
+            barterItems.all().then(results => {
                 response.end(JSON.stringify(results));
             });
         }

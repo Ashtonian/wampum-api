@@ -14,8 +14,10 @@ function getBarterItemsWithImageUrls(barterItems) {
 
 function getImageUploadInstructions(image) {
     return {
+        imageId: image.imageId,
         uploadUrl: s3.getSignedPutUrl(image.imageId, image.fileExtension),
-        accessURL: s3.getS3Path(image.imageId + image.fileExtension)
+        accessUrl: s3.getS3Path(image.imageId + image.fileExtension),
+        devicePath: image.devicePath
     };
 }
 
@@ -28,7 +30,7 @@ module.exports = {
         barterItem.images.map(image => image.imageId = uuid.v4());
 
         return barterItems.add(barterItem, userId).then((insertResults) => {
-            // TODO: validate all items were inserted correctly
+            // TODO: validate all items were inserted correctly - barterItems.images.select(imageId).should.be.in.insertResults.imageIds
             return {
                 barterItemId: barterItem.barterItemId,
                 uploadInstructions: barterItem.images.map(image => getImageUploadInstructions(image))

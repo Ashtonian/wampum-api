@@ -27,8 +27,9 @@ function getImageUploadInstructions(image) {
         devicePath: image.devicePath,
         // TODO: figure out if key/name are needed in options?
         options: {
+          /*
             fileKey: image.imageId + image.fileExtension,
-            fileName: image.imageId + image.fileExtension,
+            fileName: image.imageId + image.fileExtension,*/
             httpMethod: 'PUT',
             headers: {
                 'Content-Type': GetMimeTypeFromExtension(image.fileExtension),

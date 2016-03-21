@@ -32,22 +32,23 @@ barterItemRouter.route('/')
         response.end('item is suppossed to be updated if this was implemented.');
     });
 
-barterItemRouter.route('/:id')
-    .get((request, response) => {
-        barterItems.find(request.params.id).then(results => {
-            if (results) {
-                response.end(JSON.stringify(results));
-            } else {
-                response.status('404').end();
-            }
-        });
-    });
-
+// Order dependent must be routed before id, look into why and see about fixing it?
 barterItemRouter.route('/recommendations/').get((request, response) => {
     barterItems.recommendations().then(results => {
         response.end(JSON.stringify(results));
     });
 });
+
+barterItemRouter.route('/:id').get((request, response) => {
+    barterItems.find(request.params.id).then(results => {
+        if (results) {
+            response.end(JSON.stringify(results));
+        } else {
+            response.status('404').end();
+        }
+    });
+});
+
 
 /*
 barterItemRouter.route('/:_id/vote')

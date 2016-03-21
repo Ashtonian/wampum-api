@@ -41,8 +41,7 @@ module.exports = {
         return barterItems.all().then(getBarterItemsWithImageUrls);
     },
     recommendations: () => {
-        // TODO: replace with recommendations query ?
-        return barterItems.all().then(getBarterItemsWithImageUrls);
+        return barterItems.recommendations().then(getBarterItemsWithImageUrls);
     },
     find: id => {
         return barterItems.find(id).then(getBarterItemWithImageUrls);

@@ -56,6 +56,9 @@ module.exports = rep => {
 
         findByUserId: userId => rep.any(sql.findByUserId, userId),
 
+        // TODO: use location, if they have been voted, value ect...
+        recommendations : () => rep.any(sql.recommendations),
+
         remove: id => rep.result(sql.remove, id)
             .then(result => result.rowCount),
 

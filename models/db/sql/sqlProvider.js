@@ -29,6 +29,7 @@ module.exports = {
         all: sql('barterItems/all.sql'),
         find: sql('barterItems/find.sql'),
         findByUserId: sql('barterItems/findByUserId.sql'),
+        recommendations: sql('barterItems/recommendations.sql'),
         remove: sql('barterItems/remove.sql'),
         update: sql('barterItems/update.sql')
     }

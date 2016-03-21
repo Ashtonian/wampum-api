@@ -27,12 +27,32 @@ function getS3Path(fileName) {
 
 function GetMimeTypeFromExtension(fileExtension) {
     if (fileExtension === '.png')
-        return "image/png";
+        return 'image/png';
     if (fileExtension === '.jpeg' || fileExtension === '.jpg')
-        return "image/jpeg";
+        return 'image/jpeg';
 }
+
+function getUploadInstructions(id, fileExtension, devicePath) {
+    return {
+        id: id,
+        uploadUrl: getSignedPutUrl(id, fileExtension),
+        accessUrl: getS3Path(id + fileExtension),
+        devicePath: devicePath,
+        options: {
+            httpMethod: 'PUT',
+            headers: {
+                'Content-Type': GetMimeTypeFromExtension(fileExtension),
+                'x-amz-acl': 'public-read'
+            },
+            chunkedMode: true,
+            encodeURI: false
+        }
+    };
+}
+
 
 module.exports = {
     getS3Path: getS3Path,
-    getSignedPutUrl: getSignedPutUrl
+    getSignedPutUrl: getSignedPutUrl,
+    getUploadInstructions: getUploadInstructions
 };

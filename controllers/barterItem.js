@@ -23,7 +23,7 @@ barterItemRouter.route('/')
     })
     .post((request, response) => {
 
-        barterItems.add(request.body,defaultUserId).then(results => {
+        barterItems.add(request.body, defaultUserId).then(results => {
             response.location(request.originalUrl + '/' + results.barterItemId).status('201').end(results.uploadInstructions);
         });
 
@@ -43,14 +43,13 @@ barterItemRouter.route('/:id')
         });
     });
 
-/*
-barterItemRouter.route('/recommendations/').get(function (req, res) {
-    // TODO: pass userId, long, lat
-    barter_item.getRecommendations('', '', '').then(function (results) {
-        res.end(JSON.stringify(results));
+barterItemRouter.route('/recommendations/').get((request, response) => {
+    barterItems.recommendations().then(results => {
+        response.end(JSON.stringify(results));
     });
 });
 
+/*
 barterItemRouter.route('/:_id/vote')
     .post(function (req, res) {
         barter_item.vote().then(function (results) {

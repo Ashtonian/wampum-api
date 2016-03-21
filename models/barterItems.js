@@ -40,6 +40,10 @@ module.exports = {
     all: () => {
         return barterItems.all().then(getBarterItemsWithImageUrls);
     },
+    recommendations: () => {
+        // TODO: replace with recommendations query ?
+        return barterItems.all().then(getBarterItemsWithImageUrls);
+    }
     find: id => {
         return barterItems.find(id).then(getBarterItemWithImageUrls);
     },

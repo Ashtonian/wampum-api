@@ -26,7 +26,7 @@ function getImageUploadInstructions(image) {
         accessUrl: s3.getS3Path(image.imageId + image.fileExtension),
         devicePath: image.devicePath,
         // TODO: figure out if key/name are needed in options?
-        uploadOptions: {
+        options: {
             fileKey: image.imageId + image.fileExtension,
             fileName: image.imageId + image.fileExtension,
             httpMethod: 'PUT',

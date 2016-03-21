@@ -24,7 +24,7 @@ barterItemRouter.route('/')
     .post((request, response) => {
 
         barterItems.add(request.body, defaultUserId).then(results => {
-            response.location(request.originalUrl + '/' + results.barterItemId).status('201').send(results.uploadInstructions);
+            response.location(request.originalUrl + '/' + results.barterItemId).status('201').send({uploadInstructions: results.uploadInstructions});
         });
 
     })

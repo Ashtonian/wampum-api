@@ -28,7 +28,7 @@ module.exports = {
             // TODO: validate all items were inserted correctly - barterItems.images.select(imageId).should.be.in.insertResults.imageIds
             return {
                 barterItemId: barterItem.barterItemId,
-                uploadInstructions: barterItem.images.map(image => s3.getImageUploadInstructions(image.imageId, image.fileExtension, image.devicePath))
+                uploadInstructions: barterItem.images.map(image => s3.getUploadInstructions(image.imageId, image.fileExtension, image.devicePath))
             };
         });
     },

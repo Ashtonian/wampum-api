@@ -9,14 +9,14 @@ barterItemRouter.route('/')
         if (request.query.currentUser) {
             barterItems.findByUserId(defaultUserId).then(results => {
                 if (results) {
-                    response.end(JSON.stringify(results));
+                    response.send(results);
                 } else {
                     response.status('404').end();
                 }
             });
         } else {
             barterItems.all().then(results => {
-                response.end(JSON.stringify(results));
+                response.send(results);
             });
         }
 
@@ -24,25 +24,25 @@ barterItemRouter.route('/')
     .post((request, response) => {
 
         barterItems.add(request.body, defaultUserId).then(results => {
-            response.location(request.originalUrl + '/' + results.barterItemId).status('201').end(results.uploadInstructions);
+            response.location(request.originalUrl + '/' + results.barterItemId).status('201').send(results.uploadInstructions);
         });
 
     })
     .put((request, response) => {
-        response.end('item is suppossed to be updated if this was implemented.');
+        response.send('item is suppossed to be updated if this was implemented.');
     });
 
-// Order dependent must be routed before id, look into why and see about fixing it?
+// Order dependent must be   routed before id, look into why and see about fixing it?
 barterItemRouter.route('/recommendations/').get((request, response) => {
     barterItems.recommendations().then(results => {
-        response.end(JSON.stringify(results));
+        response.send(results);
     });
 });
 
 barterItemRouter.route('/:id').get((request, response) => {
     barterItems.find(request.params.id).then(results => {
         if (results) {
-            response.end(JSON.stringify(results));
+            response.send(results);
         } else {
             response.status('404').end();
         }

@@ -27,7 +27,9 @@ module.exports = {
 
         // set ids
         barterItem.barterItemId = uuid.v4();
-        barterItem.images.map(image => image.imageId = uuid.v4());
+        barterItem.images.forEach(image => {
+            image.imageId = uuid.v4();
+        });
 
         return barterItems.add(barterItem, userId).then(insertResults => {
             // TODO: validate all items were inserted correctly - barterItems.images.select(imageId).should.be.in.insertResults.imageIds

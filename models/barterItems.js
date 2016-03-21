@@ -29,7 +29,7 @@ module.exports = {
         barterItem.barterItemId = uuid.v4();
         barterItem.images.map(image => image.imageId = uuid.v4());
 
-        return barterItems.add(barterItem, userId).then((insertResults) => {
+        return barterItems.add(barterItem, userId).then(insertResults => {
             // TODO: validate all items were inserted correctly - barterItems.images.select(imageId).should.be.in.insertResults.imageIds
             return {
                 barterItemId: barterItem.barterItemId,
@@ -43,7 +43,7 @@ module.exports = {
     recommendations: () => {
         // TODO: replace with recommendations query ?
         return barterItems.all().then(getBarterItemsWithImageUrls);
-    }
+    },
     find: id => {
         return barterItems.find(id).then(getBarterItemWithImageUrls);
     },

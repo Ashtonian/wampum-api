@@ -12,14 +12,31 @@ function getBarterItemsWithImageUrls(barterItems) {
     return barterItems;
 }
 
+// TODO: consolodate with s3
+function GetMimeTypeFromExtension(fileExtension) {
+    if (fileExtension === '.png') return "image/png";
+    if (fileExtension === '.jpeg' || fileExtension === '.jpg') return "image/jpeg";
+}
+
+// TODO: move to s3?
 function getImageUploadInstructions(image) {
     return {
         imageId: image.imageId,
-        fileName: image.imageId + image.fileExtension,
-        fileExtension: image.fileExtension,
         uploadUrl: s3.getSignedPutUrl(image.imageId, image.fileExtension),
         accessUrl: s3.getS3Path(image.imageId + image.fileExtension),
-        devicePath: image.devicePath
+        devicePath: image.devicePath,
+        // TODO: figure out if key/name are needed in options?
+        uploadOptions: {
+            fileKey: image.imageId + image.fileExtension,
+            fileName: image.imageId + image.fileExtension,
+            httpMethod: 'PUT',
+            headers: {
+                'Content-Type': GetMimeTypeFromExtension(image.fileExtension),
+                'x-amz-acl': 'public-read'
+            },
+            chunkedMode: true,
+            encodeURI: false
+        }
     };
 }
 

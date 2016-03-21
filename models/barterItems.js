@@ -15,8 +15,8 @@ function getBarterItemsWithImageUrls(barterItems) {
 function getImageUploadInstructions(image) {
     return {
         imageId: image.imageId,
-        uploadFileName: image.imageId + image.fileExtension,
-        uploadExtension: image.fileExtension,
+        fileName: image.imageId + image.fileExtension,
+        fileExtension: image.fileExtension,
         uploadUrl: s3.getSignedPutUrl(image.imageId, image.fileExtension),
         accessUrl: s3.getS3Path(image.imageId + image.fileExtension),
         devicePath: image.devicePath

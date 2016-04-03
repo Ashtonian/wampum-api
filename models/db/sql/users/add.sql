@@ -1,2 +1,2 @@
-INSERT INTO public.User (user_id,username,email,phone_number)
-VALUES (${userId}::uuid,${username},${email},${phoneNumber})
+INSERT INTO public.User (user_id,email,phone_number,password)
+VALUES (${userId}::uuid,${email},${phoneNumber},${password}) RETURNING user_id AS "userId"

@@ -1,31 +1,62 @@
 var express = require('express');
 var userRouter = express.Router();
-var userDb = require('../models/user.js');
+var users = require('../models/users');
+var jwt = require('jwt-simple');
+var secret = 'thisneedstobeamuchbettersecret'; // TODO: fix
+
+// TODO: censor password on getters where needed, probably in the model?
 
 userRouter.route('/')
-  .get(function(req, res) {
-    userDb.getAll().then(function(result) {
-      res.end(JSON.stringify(result));
+    .get((request, response) => {
+        users.all().then((users) => {
+            response.send(users);
+        });
+    })
+    .post((request, response) => {
+        users.add(request.body).then((results) => {
+            response.location(request.originalUrl + '/' + results.userId).status('201').end();
+        });
+    }).put((request, response) => {
+        response.send('TODO'); // TODO
     });
-  })
-  .post(function(req, res) {
-    var user = {};
-    userDb.create(user).then(function(results) {
-      res.location(req.originalUrl + '/' + results._id).status('201').end();
+userRouter.route('/:userId')
+    .get((request, response) => {
+        users.find(request.params.userId).then((user) => {
+            if (user) {
+                response.send(user);
+            } else {
+                response.status('404').end();
+            }
+        });
     });
-  }).put(function(req, res) {
-    res.send('TODO'); // TODO
-  });
-  userRouter.route('/:_id')
-  .get(function(req, res) {
-    userDb.getById(req.params._id).then(function(result) {
-      if (result) {
-        res.end(JSON.stringify(result));
-      } else {
-        res.status('404').end();
-      }
+
+userRouter.post('/authenticate', (request, response) => {
+    users.findByEmail(request.body.email).then(user => {
+        if (!user) {
+            // TODO: status code?
+            response.send({
+                success: false,
+                msg: 'Authentication failed. User not found.'
+            });
+        } else {
+            users.comparePassword(request.body.password, user.password).then((isMatch,other) => {
+                if (isMatch) {
+                    var token = jwt.encode(user.userId, secret);
+                    response.send({
+                        success: true,
+                        token: 'JWT ' + token
+                    });
+                } else {
+                    response.send({
+                        success: false,
+                        msg: 'Authentication failed. Wrong password.'
+                    });
+
+                }
+            });
+        }
     });
-  });
+});
 
 
 module.exports = userRouter;

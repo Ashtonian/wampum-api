@@ -1,4 +1,4 @@
-var defaultUserId = 'db8203a5-6bb8-40c9-bcd9-10b4cc92bf25';
+var defaultUserId = 'db8203a5-6bb8-40c9-bcd9-10b4cc92bf25'; // TODO: fetch from session?
 var barterItemRouter = require('express').Router();
 
 var barterItems = require('../models/barterItems');
@@ -41,8 +41,8 @@ barterItemRouter.route('/recommendations/').get((request, response) => {
     });
 });
 
-barterItemRouter.route('/:id').get((request, response) => {
-    barterItems.find(request.params.id).then(results => {
+barterItemRouter.route('/:barterItemId').get((request, response) => {
+    barterItems.find(request.params.barterItemId).then(results => {
         if (results) {
             response.send(results);
         } else {

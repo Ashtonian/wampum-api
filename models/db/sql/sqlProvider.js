@@ -20,6 +20,7 @@ module.exports = {
         add: sql('users/add.sql'),
         all: sql('users/all.sql'),
         find: sql('users/find.sql'),
+        findByEmail: sql('users/findByEmail.sql'),
         remove: sql('users/remove.sql'),
         update: sql('users/update.sql')
     },
@@ -31,6 +32,7 @@ module.exports = {
         findByUserId: sql('barterItems/findByUserId.sql'),
         recommendations: sql('barterItems/recommendations.sql'),
         remove: sql('barterItems/remove.sql'),
-        update: sql('barterItems/update.sql')
+        update: sql('barterItems/update.sql'),
+        vote: sql('barterItems/vote.sql')
     }
 };

@@ -49,6 +49,8 @@ module.exports = rep => {
                     imageIds: data[1].map(img => img.imageId)
                 };
             }),
+            
+        vote: votes => rep.vote(sql.vote, new Inserts('${barter_item_to}::uuid,${barter_item_from}::uuid,${vote}'),votes),
 
         all: () => rep.any(sql.all),
 

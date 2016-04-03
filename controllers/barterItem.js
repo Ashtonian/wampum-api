@@ -1,4 +1,3 @@
-var defaultUserId = 'db8203a5-6bb8-40c9-bcd9-10b4cc92bf25'; // TODO: fetch from session?
 var barterItemRouter = require('express').Router();
 
 var barterItems = require('../models/barterItems');
@@ -7,7 +6,7 @@ barterItemRouter.route('/')
     .get((request, response) => {
 
         if (request.query.currentUser) {
-            barterItems.findByUserId(defaultUserId).then(results => {
+            barterItems.findByUserId(request.user.userId).then(results => {
                 if (results) {
                     response.send(results);
                 } else {
@@ -23,7 +22,7 @@ barterItemRouter.route('/')
     })
     .post((request, response) => {
 
-        barterItems.add(request.body, defaultUserId).then(results => {
+        barterItems.add(request.body, request.user.userId).then(results => {
             response.location(request.originalUrl + '/' + results.barterItemId).status('201').send({
                 uploadInstructions: results.uploadInstructions
             });

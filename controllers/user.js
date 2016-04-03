@@ -39,12 +39,16 @@ userRouter.post('/authenticate', (request, response) => {
                 msg: 'Authentication failed. User not found.'
             });
         } else {
-            users.comparePassword(request.body.password, user.password).then((isMatch,other) => {
+            users.comparePassword(request.body.password, user.password).then((isMatch, other) => {
                 if (isMatch) {
-                    var token = jwt.encode(user.userId, secret);
+                    var payload = {
+                        userId: user.userId,
+                        role: user.role
+                    };
+                    var token = jwt.encode(payload, secret);
                     response.send({
                         success: true,
-                        token: 'JWT ' + token
+                        token: 'Bearer ' + token
                     });
                 } else {
                     response.send({

@@ -2,8 +2,8 @@ var express = require('express');
 var bodyParser = require('body-parser');
 var app = express();
 var morgan = require('morgan');
-var passport = require('passport');
-require('./config/passport')(passport);
+var unless = require('express-unless');
+
 
 // TODO: response content-type elsewhere?
 // TODO: response content-length elsewhere?
@@ -29,6 +29,8 @@ require('./config/passport')(passport);
 // TODO: app yeoman template w/docker + clustering
 // TODO: use config variable for jwt secret
 // TODO: make jwt secret better
+// TODO: express-jwt returns too much information when token is not provided
+
 
 app.use(bodyParser.json({
     limit: '50mb'
@@ -36,7 +38,12 @@ app.use(bodyParser.json({
 
 app.use(morgan('dev'));
 
-app.use(passport.initialize());
+app.use(require('./config/jwt').unless({
+    path: ['/user/authenticate', {
+        url: '/user/',
+        methods: ['POST']
+    }]
+}));
 
 app.get('/', (request, response) => {
     response.send('shit is running.');
@@ -45,7 +52,7 @@ app.get('/', (request, response) => {
 var port = process.env.PORT || 8080;
 
 app.use('/user', require('./controllers/user'));
-app.use('/barter-item', passport.authenticate('jwt', { session: false}), require('./controllers/barterItem'));
+app.use('/barter-item', require('./controllers/barterItem'));
 
 app.listen(port, () => {
     console.log('Example app listening on port ' + port + '!');

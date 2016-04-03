@@ -13,6 +13,8 @@ userRouter.route('/')
         });
     })
     .post((request, response) => {
+        // TODO: move elsewhere? Default role to user
+        request.body.role = 'user';
         users.add(request.body).then((results) => {
             response.location(request.originalUrl + '/' + results.userId).status('201').end();
         });

@@ -6,4 +6,5 @@ SELECT bi.barter_item_id AS "barterItemId",
 FROM public.barter_item bi
 JOIN public.barter_item_image bii ON bi.barter_item_id = bii.barter_item_id
 WHERE bi.is_active = TRUE
+    AND bii.is_active= TRUE
 GROUP BY bi.barter_item_id

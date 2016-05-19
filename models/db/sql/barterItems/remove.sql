@@ -1,3 +1,3 @@
-UPDATE public.barter_item bi
+UPDATE public.barter_item
 SET is_active = FALSE
-WHERE bi.barter_item_id = $1::uuid
+WHERE barter_item_id = $1::uuid

@@ -33,10 +33,11 @@ userRouter.route('/:userId')
     });
 
 userRouter.post('/authenticate', (request, response) => {
+    console.log(request.body);
     users.findByEmail(request.body.email).then(user => {
         if (!user) {
             // TODO: status code?
-            response.send({
+            response.status('401').send({
                 success: false,
                 msg: 'Authentication failed. User not found.'
             });
@@ -53,7 +54,7 @@ userRouter.post('/authenticate', (request, response) => {
                         token: 'Bearer ' + token
                     });
                 } else {
-                    response.send({
+                    response.status('401').send({
                         success: false,
                         msg: 'Authentication failed. Wrong password.'
                     });
@@ -64,5 +65,7 @@ userRouter.post('/authenticate', (request, response) => {
     });
 });
 
+// TODO: GetSettings
+// TODO: UpdateSettings
 
 module.exports = userRouter;

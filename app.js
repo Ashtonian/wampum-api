@@ -1,7 +1,8 @@
 var express = require('express');
 var bodyParser = require('body-parser');
 var app = express();
-var morgan = require('morgan');
+var winston = require('winston');
+var expressWinston = require('express-winston');
 var unless = require('express-unless');
 
 
@@ -36,13 +37,24 @@ app.use(bodyParser.json({
     limit: '50mb'
 }));
 
-app.use(morgan('dev'));
+app.use(expressWinston.logger({
+    transports: [
+        new winston.transports.Console({
+            json: true,
+            colorize: true
+        })
+    ],
+    meta: true,
+    //  msg: "HTTP {{req.method}} {{req.url}}", // optional: customize the default logging message. E.g. "{{res.statusCode}} {{req.method}} {{res.responseTime}}ms {{req.url}}"
+    expressFormat: true, // Use the default Express/morgan request formatting, with the same colors. Enabling this will override any msg and colorStatus if true. Will only output colors on transports with colorize set to true
+    colorStatus: true // Color the status code, using the Express/morgan color palette (default green, 3XX cyan, 4XX yellow, 5XX red). Will not be recognized if expressFormat is true
+}));
 
 app.use(require('./config/jwt').unless({
     path: ['/user/authenticate', {
-        url: '/user/',
+        url: '/user',
         methods: ['POST']
-    }]
+    }, '/']
 }));
 
 app.get('/', (request, response) => {
@@ -53,6 +65,17 @@ var port = process.env.PORT || 8080;
 
 app.use('/user', require('./controllers/user'));
 app.use('/barter-item', require('./controllers/barterItem'));
+
+
+app.use(expressWinston.errorLogger({
+    transports: [
+        new winston.transports.Console({
+            json: true,
+            colorize: true
+        })
+    ]
+}));
+
 
 app.listen(port, () => {
     console.log('Example app listening on port ' + port + '!');
